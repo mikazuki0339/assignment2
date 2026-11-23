@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import KnowledgeMap from '../components/KnowledgeMap.astro';
+import { getAllContent } from '../utils/content';
+const entries = await getAllContent();
+---
+<BaseLayout title="知识地图" description="沿着共同标签与人工关联，在笔记之间漫游。">
+  <PageHeader eyebrow="A GARDEN OF CONNECTIONS" title="知识不是抽屉，是一座花园" intro="一个念头会通向另一个念头。连线代表共同标签或手动建立的关联，点选一个节点，就从那里重新开始。" />
+  <section class="container" aria-label="知识关联图"><KnowledgeMap entries={entries} /></section>
+</BaseLayout>

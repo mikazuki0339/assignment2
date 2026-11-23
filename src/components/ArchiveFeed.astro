@@ -1,0 +1,54 @@
+---
+import type { AnyEntry } from '../utils/content';
+import { entryUrl, formatDate } from '../utils/content';
+import TagList from './TagList.astro';
+
+interface Props {
+  entries: AnyEntry[];
+}
+const { entries } = Astro.props;
+const tags = [...new Set(entries.flatMap((entry) => entry.data.tags))].sort((a, b) => a.localeCompare(b, 'zh-CN'));
+---
+<div data-archive>
+  <div class="filter-bar" aria-label="按标签筛选">
+    <button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">全部 <span>{entries.length}</span></button>
+    {tags.map((tag) => <button class="filter-button" type="button" data-filter={tag} aria-pressed="false">#{tag}</button>)}
+  </div>
+  <div class="archive-list" aria-live="polite">
+    {entries.map((entry) => (
+      <article class="archive-item" data-filter-item data-tags={entry.data.tags.join('|')}>
+        <time class="archive-item__date" datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time>
+        <div>
+          <h2><a href={entryUrl(entry)}>{entry.data.title}</a></h2>
+          <p>{entry.data.summary}</p>
+          <TagList tags={entry.data.tags.slice(0, 3)} />
+        </div>
+        <span class="archive-item__meta">{entry.data.type} ↗</span>
+      </article>
+    ))}
+  </div>
+  <p class="empty-state" data-filter-empty hidden>这个标签下还没有记录，换一个看看。</p>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-archive]').forEach((archive) => {
+    const buttons = archive.querySelectorAll<HTMLButtonElement>('[data-filter]');
+    const items = archive.querySelectorAll<HTMLElement>('[data-filter-item]');
+    const empty = archive.querySelector<HTMLElement>('[data-filter-empty]');
+    buttons.forEach((button) => button.addEventListener('click', () => {
+      const filter = button.dataset.filter;
+      buttons.forEach((item) => {
+        const active = item === button;
+        item.classList.toggle('is-active', active);
+        item.setAttribute('aria-pressed', String(active));
+      });
+      let visible = 0;
+      items.forEach((item) => {
+        const show = filter === 'all' || item.dataset.tags?.split('|').includes(filter ?? '');
+        item.hidden = !show;
+        if (show) visible += 1;
+      });
+      if (empty) empty.hidden = visible > 0;
+    }));
+  });
+</script>

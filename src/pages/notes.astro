@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="灵感便签" description="在当前浏览器里写下、整理并导出灵感便签。">
+  <div data-pagefind-ignore>
+    <header class="container section page-intro">
+      <span class="eyebrow">POCKET NOTES / PRIVATE BY DEFAULT</span>
+      <h1 class="page-title">接住一个<br />稍纵即逝的念头。</h1>
+      <p class="lead">不必组织语言，不必等待完整。一句话、一个梦、路边听见的声音，都值得先放在这里。</p>
+    </header>
+    <section class="container notes-layout" aria-label="灵感便签编辑器">
+      <div>
+        <form class="notes-editor" data-note-form>
+          <div class="section-heading notes-editor__heading"><h2>此刻的想法</h2><span class="mono">AUTO SAVE</span></div>
+          <div class="field"><label for="note-title">标题（可以留白）</label><input id="note-title" name="title" maxlength="80" placeholder="给这个念头一个名字" autocomplete="off" /></div>
+          <div class="field"><label for="note-body">此刻在想什么？</label><textarea id="note-body" name="body" placeholder="写到这里，不用急着完整……"></textarea></div>
+          <div class="field-row">
+            <div class="field"><label for="note-tags">标签（逗号分隔）</label><input id="note-tags" name="tags" placeholder="梦，句子，待发芽" autocomplete="off" /></div>
+            <div class="field"><label for="note-mood">此刻心情</label><select id="note-mood" name="mood"><option>平静</option><option>明亮</option><option>朦胧</option><option>潮湿</option><option>雀跃</option><option>未命名</option></select></div>
+          </div>
+          <div class="button-row"><button class="button button--primary" type="submit">收好这张便签</button><button class="button button--ghost" type="button" data-new-note>另起一张</button></div>
+          <p class="save-status" data-save-status role="status" aria-live="polite">新便签将在输入后自动保存。</p>
+        </form>
+        <aside class="privacy-note"><strong>只留在这里，也随时可以带走。</strong><p>便签仅保存于当前浏览器的 localStorage，不会上传，也不会自动同步。清理浏览器数据前，请导出 Markdown 备份。</p><button class="button button--ghost" type="button" data-export-all>导出全部便签</button></aside>
+      </div>
+      <div>
+        <div class="section-heading notes-list-heading"><div><span class="eyebrow">MY LITTLE THOUGHTS</span><h2>口袋里的碎片</h2></div><span class="mono muted" data-notes-count>0 张便签</span></div>
+        <div class="empty-state" data-notes-empty><span aria-hidden="true">✳</span><p>这里还空着。<br />第一张便签，可以从“我刚刚发现……”开始。</p></div>
+        <div class="notes-list" data-notes-list></div>
+      </div>
+    </section>
+  </div>
+  <script>import '../scripts/notes';</script>
+</BaseLayout>

@@ -1,0 +1,80 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../utils/paths';
+---
+<BaseLayout title="搜索" description="在拾光集的所有文章、书影音、生活素材和新闻记录中搜索。">
+  <div class="narrow" data-pagefind-ignore data-search-base={withBase()}>
+    <header class="search-hero"><span class="eyebrow">FIND A MEMORY</span><h1 class="page-title">寻找一段记忆</h1><p class="lead">输入一个词，也许能与某个已经遗忘的下午重逢。</p></header>
+    <search class="search-box">
+      <svg width="25" height="25" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.2"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.2"/></svg>
+      <input type="search" data-search-input placeholder="例如：散步、阅读、光……" aria-label="搜索全站内容" autocomplete="off" />
+      <kbd class="kbd">/</kbd>
+    </search>
+    <p class="save-status" data-search-status role="status">索引正在准备……</p>
+    <div class="search-results" data-search-results></div>
+    <noscript><p class="empty-state">全站搜索需要启用 JavaScript。你仍然可以从分类归档中浏览所有内容。</p></noscript>
+  </div>
+</BaseLayout>
+
+<script is:inline type="module">
+  const root = document.querySelector('[data-search-base]');
+  const input = document.querySelector('[data-search-input]');
+  const results = document.querySelector('[data-search-results]');
+  const status = document.querySelector('[data-search-status]');
+  let pagefind;
+  let searchSequence = 0;
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName ?? '')) {
+      event.preventDefault();
+      input?.focus();
+    }
+  });
+
+  async function runSearch(query) {
+    if (!pagefind || !results || !status) return;
+    const sequence = ++searchSequence;
+    if (!query.trim()) {
+      results.replaceChildren();
+      status.textContent = '输入关键词，搜索标题、摘要与正文。';
+      return;
+    }
+    status.textContent = '正在翻找……';
+    const response = await pagefind.search(query);
+    const items = await Promise.all(response.results.slice(0, 30).map(async (result) => await result.data()));
+    if (sequence !== searchSequence) return;
+    results.replaceChildren();
+    status.textContent = items.length ? `找到 ${response.results.length} 条相关记录` : '没有找到相符的记录，换一个词试试。';
+    for (const item of items) {
+      const article = document.createElement('article');
+      article.className = 'search-result';
+      const heading = document.createElement('h2');
+      const link = document.createElement('a');
+      link.href = item.url;
+      link.textContent = item.meta.title || '无标题记录';
+      heading.append(link);
+      const excerpt = document.createElement('p');
+      excerpt.innerHTML = item.excerpt;
+      article.append(heading, excerpt);
+      results.append(article);
+    }
+  }
+
+  let timer;
+  input?.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => runSearch(input.value), 180);
+  });
+
+  try {
+    const base = root?.getAttribute('data-search-base') || '/';
+    pagefind = await import(`${base}pagefind/pagefind.js`);
+    await pagefind.init();
+    if (status) status.textContent = '输入关键词，搜索标题、摘要与正文。';
+    const initial = new URLSearchParams(location.search).get('q');
+    if (initial && input) { input.value = initial; await runSearch(initial); }
+  } catch (error) {
+    console.error('Pagefind 初始化失败', error);
+    if (status) status.textContent = '搜索索引尚未生成。运行 npm run build 后，通过预览服务即可使用搜索。';
+  }
+</script>

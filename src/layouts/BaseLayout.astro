@@ -1,0 +1,87 @@
+---
+import { navItems, site } from '../config';
+import { withBase } from '../utils/paths';
+import ThemePull from '../components/ThemePull.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description = site.description } = Astro.props;
+const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · ${site.subtitle}`;
+const pathname = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="zh-CN" data-shiguang-theme="day">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f1eddf" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%2345664d'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='34' fill='%23faf7ee'%3E%E6%8B%BE%3C/text%3E%3C/svg%3E" />
+    <title>{pageTitle}</title>
+    <script is:inline>
+      (() => {
+        const saved = localStorage.getItem('shiguang-theme');
+        const theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day');
+        document.documentElement.dataset.shiguangTheme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到正文</a>
+    <header class="site-header">
+      <a class="brand" href={withBase()} aria-label="拾光集首页">
+        <span class="brand-seal" aria-hidden="true">拾</span>
+        <span>
+          <span class="brand-name">{site.title}</span>
+          <span class="brand-latin">FIELD NOTES &amp; DAYDREAMS</span>
+        </span>
+      </a>
+      <button class="menu-toggle" type="button" aria-label="展开导航" aria-expanded="false" aria-controls="site-nav">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.4" /></svg>
+      </button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        {navItems.map((item) => {
+          const href = withBase(item.href);
+          const active = item.href === '' ? pathname === href : pathname.startsWith(href);
+          return <a href={href} aria-current={active ? 'page' : undefined}>{item.label}</a>;
+        })}
+      </nav>
+      <div class="header-actions">
+        <a class="icon-link" href={withBase('search/')} aria-label="搜索">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.5"/></svg>
+        </a>
+        <ThemePull />
+      </div>
+    </header>
+
+    <main id="main"><slot /></main>
+
+    <footer class="site-footer">
+      <div>
+        <span class="footer-mark" aria-hidden="true">✳</span>
+        <p>愿每一个稍纵即逝的念头，都有处安放。</p>
+        <span class="mono">© {new Date().getFullYear()} {site.title} · BUILT SLOWLY, KEPT LONG</span>
+      </div>
+      <div class="footer-links">
+        <a href={withBase('about/')}>关于本站</a>
+        <a href={withBase('notes/')}>留下一笔</a>
+        <a href={withBase('search/')}>寻找记忆</a>
+      </div>
+    </footer>
+    <div class="toast" role="status" aria-live="polite" data-toast></div>
+    <script>
+      const menuButton = document.querySelector<HTMLButtonElement>('.menu-toggle');
+      const nav = document.querySelector<HTMLElement>('.site-nav');
+      menuButton?.addEventListener('click', () => {
+        const open = nav?.classList.toggle('is-open') ?? false;
+        menuButton.setAttribute('aria-expanded', String(open));
+        menuButton.setAttribute('aria-label', open ? '收起导航' : '展开导航');
+      });
+    </script>
+  </body>
+</html>

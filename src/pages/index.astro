@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContentCard from '../components/ContentCard.astro';
+import TagList from '../components/TagList.astro';
+import { getAllContent, entryUrl, formatDate } from '../utils/content';
+import { withBase } from '../utils/paths';
+
+const entries = await getAllContent();
+const latest = entries.slice(0, 6);
+const randomEntry = entries[(new Date().getDate() * 7) % entries.length];
+const tags = [...new Set(entries.flatMap((entry) => entry.data.tags))].slice(0, 16);
+---
+<BaseLayout>
+  <section class="container hero">
+    <div>
+      <span class="eyebrow">A PERSONAL KNOWLEDGE GARDEN</span>
+      <h1 class="display-title">把路过的时间，<br />养成一座<em>花园。</em></h1>
+      <p class="lead">这里收藏未完成的灵感、认真读过的书，和街角那些容易被忽略的微光。不追赶热点，只为记忆留一条回来的路。</p>
+      <div class="hero-index" aria-label="本站特色"><span><i></i>自由记录</span><span><i></i>缓慢生长</span><span><i></i>彼此相连</span></div>
+    </div>
+    <aside class="hero-note">
+      <span class="hero-note__number">A NOTE TO MYSELF / 001</span>
+      <blockquote>“不是每条思绪都要成为文章，有些只需要被温柔地接住。”</blockquote>
+      <svg class="botanical" viewBox="0 0 150 180" fill="none" aria-hidden="true">
+        <path d="M75 172C78 125 62 91 75 38M74 123C44 118 27 98 24 70C51 73 70 91 74 123ZM70 87C99 84 117 65 121 38C95 40 76 58 70 87ZM75 52C57 40 54 22 59 8C77 18 84 34 75 52Z" stroke="currentColor" stroke-width="1.2" />
+        <path d="M75 145C98 144 114 132 122 112C100 111 83 123 75 145Z" stroke="currentColor" stroke-width="1.2" />
+      </svg>
+    </aside>
+  </section>
+
+  <div class="container quick-capture">
+    <div><h2>此刻，有什么掠过心头？</h2><p>一句话也可以。便签会自动留在这个浏览器里。</p></div>
+    <a class="button" href={withBase('notes/')}>写下一张便签 <span aria-hidden="true">↗</span></a>
+  </div>
+
+  <section class="container section" aria-labelledby="recent-heading">
+    <div class="section-heading">
+      <div><span class="eyebrow">RECENTLY GATHERED</span><h2 id="recent-heading">最近拾起的片段</h2></div>
+      <a class="text-link" href={withBase('articles/')}>浏览全部文章</a>
+    </div>
+    <div class="content-grid">{latest.map((entry, index) => <ContentCard entry={entry} featured={index === 0} />)}</div>
+  </section>
+
+  <section class="container section discovery-grid" aria-labelledby="wander-heading">
+    <div>
+      <span class="eyebrow">FOLLOW A THREAD</span>
+      <h2 id="wander-heading">循着一根线，<br />去另一个念头。</h2>
+      <p class="muted">标签不是抽屉，更像是植物之间看不见的根系。</p>
+      <TagList tags={tags} />
+      <a class="button button--ghost" href={withBase('map/')}>看看知识地图</a>
+    </div>
+    <a class="serendipity-card" href={entryUrl(randomEntry)}>
+      <span class="eyebrow">A CARD FOR TODAY</span>
+      <span class="serendipity-card__mark" aria-hidden="true">✳</span>
+      <h3>{randomEntry.data.title}</h3>
+      <p>{randomEntry.data.summary}</p>
+      <footer><span>{formatDate(randomEntry.data.date)}</span><span>翻开这张卡片 ↗</span></footer>
+    </a>
+  </section>
+</BaseLayout>

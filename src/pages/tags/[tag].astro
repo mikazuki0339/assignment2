@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContentCard from '../../components/ContentCard.astro';
+import { getAllContent } from '../../utils/content';
+
+export async function getStaticPaths() {
+  const entries = await getAllContent();
+  const tags = [...new Set(entries.flatMap((entry) => entry.data.tags))];
+  return tags.map((tag) => ({ params: { tag }, props: { tag, entries: entries.filter((entry) => entry.data.tags.includes(tag)) } }));
+}
+const { tag, entries } = Astro.props;
+---
+<BaseLayout title={`标签：${tag}`} description={`拾光集中与「${tag}」有关的所有记录。`}>
+  <header class="container section page-intro"><span class="eyebrow">A THREAD THROUGH THE GARDEN</span><h1 class="page-title">#{tag}</h1><p class="lead">共有 {entries.length} 条记录系在这根线上。分类不同，也许正说着同一件事。</p></header>
+  <section class="container content-grid" aria-label={`标签 ${tag} 下的内容`}>{entries.map((entry) => <ContentCard entry={entry} />)}</section>
+</BaseLayout>

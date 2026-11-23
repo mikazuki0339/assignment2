@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import ArchiveFeed from '../../components/ArchiveFeed.astro';
+import { getPublished } from '../../utils/content';
+const entries = await getPublished('life');
+---
+<BaseLayout title="生活素材" description="天气、展览、光影与声音，留住生活的原始材质。">
+  <PageHeader eyebrow="FIELD NOTES / 03" title="生活素材" intro="那些还没有成为文章的照片、声音与片段，先保留它们原来的质地。" />
+  <section class="container" aria-label="生活素材列表"><ArchiveFeed entries={entries} /></section>
+</BaseLayout>

@@ -1,0 +1,44 @@
+---
+import type { AnyEntry } from '../utils/content';
+import { collectionMeta, entryKey, entryUrl } from '../utils/content';
+
+interface Props { entries: AnyEntry[]; }
+const { entries } = Astro.props;
+const cx = 400, cy = 240, rx = 285, ry = 170;
+const nodes = entries.map((entry, index) => {
+  const angle = (Math.PI * 2 * index) / entries.length - Math.PI / 2;
+  return { entry, key: entryKey(entry), x: cx + rx * Math.cos(angle), y: cy + ry * Math.sin(angle) };
+});
+const edgeKeys = new Set<string>();
+const edges: { from: (typeof nodes)[number]; to: (typeof nodes)[number] }[] = [];
+for (const node of nodes) {
+  for (const other of nodes) {
+    if (node.key === other.key) continue;
+    const linked = node.entry.data.related.includes(other.key) || node.entry.data.tags.some((tag) => other.entry.data.tags.includes(tag));
+    if (!linked) continue;
+    const id = [node.key, other.key].sort().join('::');
+    if (edgeKeys.has(id)) continue;
+    edgeKeys.add(id);
+    edges.push({ from: node, to: other });
+  }
+}
+---
+<div class="map-wrap">
+  <svg class="knowledge-map" viewBox="0 0 800 480" role="img" aria-labelledby="map-title map-desc">
+    <title id="map-title">拾光集知识地图</title>
+    <desc id="map-desc">节点代表文章与收藏，连线代表人工关联或共同标签。右侧提供可访问的文本列表。</desc>
+    {edges.map(({ from, to }) => <line x1={from.x} y1={from.y} x2={to.x} y2={to.y} />)}
+    {nodes.map(({ entry, key, x, y }) => (
+      <a href={entryUrl(entry)} aria-label={`${collectionMeta[entry.collection].label}：${entry.data.title}`} data-node={key}>
+        <circle cx={x} cy={y} r="7" />
+        <text x={x} y={y + 26} text-anchor="middle">{entry.data.title.length > 11 ? `${entry.data.title.slice(0, 10)}…` : entry.data.title}</text>
+      </a>
+    ))}
+  </svg>
+  <aside class="map-list">
+    <span class="eyebrow">TEXT INDEX</span>
+    <h2>所有路径</h2>
+    <p class="muted sans">连线来自共同标签与作者设置的关联。点击任一标题，继续漫游。</p>
+    <ul>{nodes.map(({ entry }) => <li><a href={entryUrl(entry)}>{entry.data.title}</a><br /><small>{collectionMeta[entry.collection].label}</small></li>)}</ul>
+  </aside>
+</div>

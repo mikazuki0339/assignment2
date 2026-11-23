@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import ArchiveFeed from '../../components/ArchiveFeed.astro';
+import { getPublished } from '../../utils/content';
+const entries = await getPublished('articles');
+---
+<BaseLayout title="文章与见闻" description="关于阅读、城市、写作与日常的散文和见闻。">
+  <PageHeader eyebrow="ESSAYS & OBSERVATIONS / 01" title="文章与见闻" intro="把短暂的观察写成可以重返的现场，也把尚未想明白的问题留在这里。" />
+  <section class="container" aria-label="文章列表"><ArchiveFeed entries={entries} /></section>
+</BaseLayout>

@@ -1,0 +1,24 @@
+---
+import type { AnyEntry } from '../utils/content';
+import { collectionMeta, entryUrl, formatDate } from '../utils/content';
+import TagList from './TagList.astro';
+
+interface Props {
+  entry: AnyEntry;
+  featured?: boolean;
+}
+const { entry, featured = false } = Astro.props;
+const meta = collectionMeta[entry.collection];
+---
+<article class:list={["content-card", { "content-card--feature": featured }]} data-filter-item data-tags={entry.data.tags.join('|')}>
+  <div class="content-card__top">
+    <span>{meta.index} / {meta.label}</span>
+    <time datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time>
+  </div>
+  <h3><a href={entryUrl(entry)}>{entry.data.title}</a></h3>
+  <p>{entry.data.summary}</p>
+  <div class="content-card__bottom">
+    <TagList tags={entry.data.tags.slice(0, 3)} />
+    <a class="card-arrow" href={entryUrl(entry)} aria-label={`阅读：${entry.data.title}`}>↗</a>
+  </div>
+</article>

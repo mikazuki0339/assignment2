@@ -1,0 +1,16 @@
+---
+import { withBase } from '../utils/paths';
+
+interface Props {
+  tags: string[];
+  linked?: boolean;
+}
+const { tags, linked = true } = Astro.props;
+---
+<ul class="tag-list" aria-label="标签">
+  {tags.map((tag) => (
+    <li>
+      {linked ? <a class="tag" href={withBase(`tags/${encodeURIComponent(tag)}/`)}>#{tag}</a> : <span class="tag">#{tag}</span>}
+    </li>
+  ))}
+</ul>

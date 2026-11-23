@@ -1,0 +1,61 @@
+<div class="theme-pull" data-theme-pull>
+  <button class="theme-pull__button" type="button" aria-label="切换到雨夜书房" aria-pressed="false" title="拉动灯绳，切换昼夜">
+    <span class="theme-pull__cord" aria-hidden="true"></span>
+    <span class="theme-pull__knob" aria-hidden="true"></span>
+  </button>
+  <span class="theme-pull__label" aria-hidden="true">DAY / NIGHT</span>
+</div>
+
+<script>
+  const pull = document.querySelector<HTMLElement>('[data-theme-pull]');
+  const button = pull?.querySelector<HTMLButtonElement>('button');
+
+  if (pull && button) {
+    let startY = 0;
+    let dragged = false;
+    let suppressClick = false;
+
+    const syncLabel = () => {
+      const night = document.documentElement.dataset.shiguangTheme === 'night';
+      button.setAttribute('aria-pressed', String(night));
+      button.setAttribute('aria-label', night ? '切换到纸上花园' : '切换到雨夜书房');
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', night ? '#101923' : '#f1eddf');
+    };
+
+    const toggleTheme = () => {
+      const next = document.documentElement.dataset.shiguangTheme === 'night' ? 'day' : 'night';
+      document.documentElement.dataset.shiguangTheme = next;
+      localStorage.setItem('shiguang-theme', next);
+      syncLabel();
+    };
+
+    button.addEventListener('click', () => {
+      if (suppressClick) {
+        suppressClick = false;
+        return;
+      }
+      toggleTheme();
+    });
+    button.addEventListener('pointerdown', (event) => {
+      startY = event.clientY;
+      dragged = false;
+      button.setPointerCapture(event.pointerId);
+    });
+    button.addEventListener('pointermove', (event) => {
+      if (!button.hasPointerCapture(event.pointerId)) return;
+      dragged = event.clientY - startY > 10;
+      pull.classList.toggle('is-pulling', dragged);
+    });
+    button.addEventListener('pointerup', (event) => {
+      if (button.hasPointerCapture(event.pointerId)) button.releasePointerCapture(event.pointerId);
+      pull.classList.remove('is-pulling');
+      if (dragged) {
+        suppressClick = true;
+        toggleTheme();
+      }
+      dragged = false;
+    });
+    button.addEventListener('pointercancel', () => pull.classList.remove('is-pulling'));
+    syncLabel();
+  }
+</script>

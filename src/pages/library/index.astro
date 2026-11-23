@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import TagList from '../../components/TagList.astro';
+import { entryUrl, getPublished } from '../../utils/content';
+const entries = await getPublished('library');
+---
+<BaseLayout title="书影音档案" description="读过的书、看过的电影和听过的音乐，以及私人评论。">
+  <PageHeader eyebrow="BOOKS, FILMS & SOUNDS / 02" title="书影音档案" intro="不只记录评分，也记录一部作品在哪个人生时刻遇见了我。" />
+  <section class="container media-grid" aria-label="书影音列表">
+    {entries.map((entry) => (
+      <article class="media-card">
+        <div class="media-card__body">
+          <div class="content-card__top"><span>{entry.data.type} / {entry.data.status}</span><span class="rating" aria-label={`评分 ${entry.data.rating} 分`}>{'★'.repeat(Math.round(entry.data.rating))}</span></div>
+          <h2><a href={entryUrl(entry)}>{entry.data.title}</a></h2>
+          <p class="media-creator">{entry.data.creator}</p>
+          <p>{entry.data.summary}</p>
+          <TagList tags={entry.data.tags} />
+          <a class="text-link" href={entryUrl(entry)}>读私人评论</a>
+        </div>
+      </article>
+    ))}
+  </section>
+</BaseLayout>

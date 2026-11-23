@@ -1,0 +1,60 @@
+---
+import type { AnyEntry } from '../utils/content';
+import { collectionMeta, entryUrl, formatDate } from '../utils/content';
+import { withBase } from '../utils/paths';
+import TagList from './TagList.astro';
+import ContentCard from './ContentCard.astro';
+
+interface Props {
+  entry: AnyEntry;
+  siblings: AnyEntry[];
+  related: AnyEntry[];
+}
+const { entry, siblings, related } = Astro.props;
+const index = siblings.findIndex((item) => item.id === entry.id);
+const newer = index > 0 ? siblings[index - 1] : undefined;
+const older = index < siblings.length - 1 ? siblings[index + 1] : undefined;
+const meta = collectionMeta[entry.collection];
+---
+<article>
+  <header class="article-header" data-pagefind-body>
+    <div class="narrow">
+      <a class="eyebrow" href={withBase(meta.path)}>{meta.index} / {meta.label}</a>
+      <h1>{entry.data.title}</h1>
+      <p class="lead">{entry.data.summary}</p>
+      <div class="article-meta">
+        <time datetime={entry.data.date.toISOString()}>记于 {formatDate(entry.data.date)}</time>
+        <span>{entry.data.type}</span>
+        {entry.collection === 'library' && <><span>{entry.data.creator}</span><span>{entry.data.status} · {entry.data.rating}/5</span></>}
+        {entry.collection === 'life' && <span>{entry.data.mediaType}</span>}
+      </div>
+      <TagList tags={entry.data.tags} />
+    </div>
+  </header>
+  <div class="narrow prose" data-pagefind-body>
+    <slot />
+    {entry.collection === 'news' && (
+      <aside class="source-note">
+        <span class="eyebrow">SOURCE / 原始来源</span>
+        <p>事件日期：{formatDate(entry.data.sourceDate)}。本页为个人策展与评论，请访问来源阅读完整信息。</p>
+        <a class="text-link" href={entry.data.sourceUrl} target="_blank" rel="noopener noreferrer">访问原始来源</a>
+      </aside>
+    )}
+    {entry.collection === 'life' && entry.data.alt && <p class="media-caption">画面备忘：{entry.data.alt}</p>}
+  </div>
+</article>
+
+<nav class="narrow article-nav" aria-label="相邻文章">
+  {older ? <a href={entryUrl(older)}><small>← 较早一篇</small>{older.data.title}</a> : <span></span>}
+  {newer ? <a href={entryUrl(newer)}><small>较新一篇 →</small>{newer.data.title}</a> : <span></span>}
+</nav>
+
+{related.length > 0 && (
+  <section class="container section" aria-labelledby="related-heading">
+    <div class="section-heading">
+      <div><span class="eyebrow">THREADS / 关联线索</span><h2 id="related-heading">沿着这条思路，再走走</h2></div>
+      <a class="text-link" href={withBase('map/')}>打开知识地图</a>
+    </div>
+    <div class="content-grid">{related.map((item) => <ContentCard entry={item} />)}</div>
+  </section>
+)}

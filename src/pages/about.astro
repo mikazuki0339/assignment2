@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config';
+import { withBase } from '../utils/paths';
+---
+<BaseLayout title="关于" description="关于拾光集的内容组织、隐私与维护方式。">
+  <header class="container section page-intro"><span class="eyebrow">ABOUT THIS QUIET CORNER</span><h1 class="page-title">一间不必正襟危坐的<br />数字书房。</h1><p class="lead">{site.description}</p></header>
+  <div class="narrow prose">
+    <h2>为什么是「拾光集」？</h2>
+    <p>“拾”是弯下腰的动作，“光”是那些本来会错过的瞬间。这里不追求日更，也不要求每篇文字都有结论。它更像一个可以被反复打开的盒子，保存观察，也保存观察时的心情。</p>
+    <h2>这里如何生长？</h2>
+    <p>正式内容以 Markdown 文件保存，按照文章与见闻、书影音、生活素材、新闻记录分类。标签与关联让它们越过分类，重新相遇。修改一个文件、完成一次发布，这棵植物就多长一片叶子。</p>
+    <h2>你的便签属于谁？</h2>
+    <p><a href={withBase('notes/')}>灵感便签</a>完全保存在你自己的浏览器里，没有账号，也不上传服务器。它适合临时捕捉，不等于云端备份。请定期导出 Markdown；换设备或清理浏览器数据前，也别忘了带走它们。</p>
+    <h2>昼夜两种样子</h2>
+    <p>白天是纸上花园，夜晚是雨夜书房。点击或向下拖动右上角的灯绳即可切换，选择会保留在当前浏览器。如果系统要求减少动态效果，拉绳会安静地完成切换。</p>
+    <blockquote>愿这里不是一个需要经营的橱窗，而是一块随时可以回来坐一坐的草地。</blockquote>
+  </div>
+</BaseLayout>
